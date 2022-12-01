@@ -4,10 +4,11 @@
 #include <windows.h>
 
 enum SAMPVER {
-	SAMP_NOT_LOADED,
-	SAMP_UNKNOWN,
-	SAMP_037_R1,
-	SAMP_037_R3_1
+    SAMP_NOT_LOADED,
+    SAMP_UNKNOWN,
+    SAMP_037_R1,
+    SAMP_037_R3_1,
+    SAMP_037_5
 };
 
 typedef void(__cdecl* CMDPROC)(const char*);
@@ -16,14 +17,16 @@ const uintptr_t samp_addressess[][19]
 {
     // CChat, ::CChat, ::OnLostDevice, ::OnResetDevice, ::Draw->call ::Render, getChatFontName, ::AddEntry, ::Scroll->call DXUT__Scroll, ::ScrollToBottom, ::PageUp, ::PageDown, CInput, CInput::AddCommand, CConfig?, CConfig?::SaveVariable, CConfig?::ReadVariable, CNetGame
     {0x21A0E4, 0x647B0, 0x635D0, 0x64600, 0x642E7, 0xB3D40, 0x64010, 0xB87E7, 0xB3C60, 0x63828, 0x637C0, 0x63700, 0x63760, 0x21A0E8, 0x65AD0, 0x21A0E0, 0x624C0, 0x62250, 0x21A0F8},       // SAMP_037_R1
-    {0x26E8C8, 0x67C00, 0x66A20, 0x67A50, 0x67737, 0xC5C00, 0x67460, 0xCA970, 0xC5B20, 0x66C78, 0x66C10, 0x66B50, 0x66BB0, 0x26E8CC, 0x69000, 0x26E8C4, 0x65910, 0x656A0, 0x26E8DC}        // SAMP_037_R3_1
+    {0x26E8C8, 0x67C00, 0x66A20, 0x67A50, 0x67737, 0xC5C00, 0x67460, 0xCA970, 0xC5B20, 0x66C78, 0x66C10, 0x66B50, 0x66BB0, 0x26E8CC, 0x69000, 0x26E8C4, 0x65910, 0x656A0, 0x26E8DC},       // SAMP_037_R3_1
+    {0x26EB80, 0x68380, 0x671A0, 0x681D0, 0x67EB7, 0xC5370, 0x67BE0, 0xCA130, 0xC5290, 0x673F8, 0x67390, 0x672D0, 0x67330, 0x26EB84, 0x69770, 0x26EB7C, 0x66080, 0x65E10, 0x26EB94}        // SAMP_037_R5
 };
 
 const uintptr_t chat_nops[][2]
 {
     // nop begin, size
     {0x6428C, 0x4B},
-    {0x676DC, 0x4B}
+    {0x676DC, 0x4B},
+    {0x67E5C, 0x4B}
 };
 
 inline uintptr_t sampGetBase()
@@ -40,7 +43,7 @@ inline SAMPVER sampGetVersion()
 {
     static SAMPVER sampVersion = SAMPVER::SAMP_NOT_LOADED;
     if (sampVersion <= SAMPVER::SAMP_UNKNOWN)
-	{
+    {
         uintptr_t base = sampGetBase();
         if (base == SAMPVER::SAMP_NOT_LOADED) return SAMPVER::SAMP_NOT_LOADED;
 
@@ -54,6 +57,9 @@ inline SAMPVER sampGetVersion()
             break;
         case 0xCC4D0:
             sampVersion = SAMPVER::SAMP_037_R3_1;
+            break;
+        case 0xCBC90:
+            sampVersion = SAMPVER::SAMP_037_5;
             break;
         default:
             sampVersion = SAMPVER::SAMP_UNKNOWN;
@@ -72,7 +78,7 @@ inline bool isSampAvailable()
 
 inline uintptr_t sampGetChatInfoPtr()
 {
-	return *reinterpret_cast<uintptr_t*>(sampGetBase() + SAMP_OFFSET[0]);
+    return *reinterpret_cast<uintptr_t*>(sampGetBase() + SAMP_OFFSET[0]);
 }
 
 inline uintptr_t sampGetChatConstr()
